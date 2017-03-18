@@ -38,4 +38,6 @@ EOF
     chmod 0600 /root/.ssh/known_hosts &&
     pass git fetch origin master &&
     pass git checkout master &&
+    cp /opt/docker/post-commit.sh ${HOME}/.password-store/.git/hooks/post-commit &&
+    chmod 0500 ${HOME}/.password-store/.git/hooks/post-commit &&
     bash
