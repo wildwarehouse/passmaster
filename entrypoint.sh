@@ -15,23 +15,26 @@
 #   You should have received a copy of the GNU General Public License
 #   along with passmaster.  If not, see <http://www.gnu.org/licenses/>.
 
-gpg --batch --import /srv/secret1.key &&
-    gpg --batch --import-ownertrust /srv/owner1.trust &&
-    gpg2 --batch --import /srv/secret2.key &&
-    gpg2 --batch --import-ownertrust /srv/owner2.trust &&
+gpg --batch --import /secrets/gpg/secret1.key &&
+    gpg --batch --import-ownertrust /secrets/gpg/owner1.trust &&
+    gpg2 --batch --import /secrets/gpg/secret2.key &&
+    gpg2 --batch --import-ownertrust /secrets/gpg/owner2.trust &&
+    source /secrets/gpg.env &&
     pass init ${GPG_KEY_ID} &&
     pass git init &&
+    source /secrets/git.env &&
     pass git config user.name "${GIT_USER_NAME}" &&
     pass git config user.email "${GIT_USER_EMAIL}" &&
     pass git remote add origin git@github.com:desertedscorpion/passwordstore.git &&
     ssh-keygen -f /root/.ssh/id_rsa -P "" -C "" &&
-    (cat <<EOF
+    source /secrets/github.env &&
+    (curl --data @- "https://api.github.com/user/keys?access_token=${GITHUB_PRIVATE_TOKEN}" <<EOF
 {
     "title": "generated",
     "key": "$(cat /root/.ssh/id_rsa.pub)"
 }
 EOF
-    ) | curl --data @- "https://api.github.com/user/keys?access_token=${GPG_PRIVATE_TOKEN}" &&
+    ) &&
     cp /opt/docker/config /root/.ssh &&
     chmod 0600 /root/.ssh/config &&
     cp /opt/docker/known_hosts /root/.ssh &&
